@@ -75,7 +75,7 @@ function SignupPage() {
     const code = String(Math.floor(100000 + Math.random() * 900000));
     const { error: otpError } = await supabase
       .from("signup_otps")
-      .insert({ email, code });
+      .insert({ email, code, purpose: "signup" });
     setLoading(false);
 
     if (otpError) {
