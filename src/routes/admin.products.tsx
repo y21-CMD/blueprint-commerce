@@ -1,12 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ImagePlus, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const CATEGORIES = ["Journals", "Writing", "Cards", "Paper", "Sealing"] as const;
 import {
   Dialog,
   DialogContent,
