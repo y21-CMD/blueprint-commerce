@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/logo.jpg";
 
 const nav = [
   { to: "/", label: "Home" },
