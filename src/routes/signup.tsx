@@ -56,7 +56,7 @@ function SignupPage() {
     }
 
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -64,25 +64,32 @@ function SignupPage() {
         data: { full_name: name },
       },
     });
-    setLoading(false);
 
     if (error) {
+      setLoading(false);
       toast.error(error.message);
       return;
     }
 
-    // Instant in-app welcome — fires immediately on successful signup.
-    toast.success(`Welcome to Lestationery, ${name.split(" ")[0]} ✨`, {
-      description:
-        "Your account is ready. We've sent a confirmation to your inbox — please verify to sign in.",
-      duration: 6000,
+    // Generate and store a 6-digit OTP for verification.
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const { error: otpError } = await supabase
+      .from("signup_otps")
+      .insert({ email, code });
+    setLoading(false);
+
+    if (otpError) {
+      toast.error("Account created but couldn't send verification code.");
+      return;
+    }
+
+    // Email delivery is skipped — show the code in a toast for demo/testing.
+    toast.success(`Welcome, ${name.split(" ")[0]} ✨`, {
+      description: `Your verification code is: ${code}`,
+      duration: 12000,
     });
 
-    if (data.session) {
-      navigate({ to: "/dashboard" });
-    } else {
-      navigate({ to: "/login" });
-    }
+    navigate({ to: "/verify-otp", search: { email } });
   };
 
   return (
