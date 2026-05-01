@@ -6,7 +6,7 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
+import { resetPasswordWithOtp } from "@/server/password-reset.functions";
 import { toast } from "sonner";
 
 const searchSchema = z.object({
