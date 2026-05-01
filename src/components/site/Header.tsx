@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/logo.jpg";
 
 const nav = [
   { to: "/", label: "Home" },
@@ -31,9 +32,13 @@ export function Header() {
 
         <Link
           to="/"
-          className="font-display text-2xl tracking-wide text-primary md:text-3xl"
+          className="flex items-center gap-3"
+          aria-label="My-Sea home"
         >
-          Lestationery
+          <img src={logo} alt="My-Sea logo" className="h-10 w-10 rounded-sm object-contain md:h-12 md:w-12" />
+          <span className="font-display text-2xl tracking-wide text-primary md:text-3xl">
+            My-Sea
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-10 md:flex">
