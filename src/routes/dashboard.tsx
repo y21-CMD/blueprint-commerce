@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/format";
 
@@ -29,6 +30,7 @@ export const Route = createFileRoute("/dashboard")({
 
 function DashboardPage() {
   const { user, loading: authLoading, signOut } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<OrderRow[] | null>(null);
 
@@ -73,9 +75,16 @@ function DashboardPage() {
               Hello, {user.email?.split("@")[0]}
             </h1>
           </div>
-          <Button variant="ghost" onClick={() => signOut()}>
-            Sign out
-          </Button>
+          <div className="flex gap-2">
+            {isAdmin && (
+              <Button asChild className="rounded-full bg-[var(--gold)] text-[var(--ink)] hover:bg-[var(--gold-deep)]">
+                <Link to="/admin">Admin panel</Link>
+              </Button>
+            )}
+            <Button variant="ghost" onClick={() => signOut()}>
+              Sign out
+            </Button>
+          </div>
         </div>
 
         <h2 className="mt-16 mb-6 font-display text-3xl">Order history</h2>
