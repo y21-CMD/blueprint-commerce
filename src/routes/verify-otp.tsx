@@ -133,7 +133,9 @@ function VerifyOtpPage() {
             {digits.map((d, i) => (
               <input
                 key={i}
-                ref={(el) => (inputs.current[i] = el)}
+                ref={(el) => {
+                  inputs.current[i] = el;
+                }}
                 type="text"
                 inputMode="numeric"
                 maxLength={1}
