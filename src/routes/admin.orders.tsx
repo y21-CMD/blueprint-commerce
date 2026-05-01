@@ -92,7 +92,7 @@ function OrdersAdmin() {
               <TableRow><TableCell colSpan={6} className="py-12 text-center text-muted-foreground">No orders yet.</TableCell></TableRow>
             ) : (
               orders.map((o) => (
-                <FragmentWithKey key={o.id}>
+                <Fragment key={o.id}>
                   <TableRow className="cursor-pointer" onClick={() => setExpanded(expanded === o.id ? null : o.id)}>
                     <TableCell>
                       {expanded === o.id ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -137,7 +137,7 @@ function OrdersAdmin() {
                       </TableCell>
                     </TableRow>
                   )}
-                </FragmentWithKey>
+                </Fragment>
               ))
             )}
           </TableBody>
