@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { z } from "zod";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/contact")({
@@ -20,8 +22,63 @@ export const Route = createFileRoute("/contact")({
   component: ContactPage,
 });
 
+const RECIPIENT = "y23938476@gmail.com";
+
+const contactSchema = z.object({
+  name: z.string().trim().min(1, "Please enter your name").max(100),
+  email: z.string().trim().email("Enter a valid email").max(255),
+  message: z
+    .string()
+    .trim()
+    .min(5, "A few more words, please")
+    .max(2000, "Message is too long"),
+});
+
 function ContactPage() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+
+    const result = contactSchema.safeParse({ name, email, message });
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const key = issue.path[0]?.toString() ?? "form";
+        if (!fieldErrors[key]) fieldErrors[key] = issue.message;
+      }
+      setErrors(fieldErrors);
+      return;
+    }
+
+    setLoading(true);
+    const { error } = await supabase.from("contact_submissions").insert({
+      name: result.data.name,
+      email: result.data.email,
+      message: result.data.message,
+      recipient: RECIPIENT,
+    });
+    setLoading(false);
+
+    if (error) {
+      toast.error("Couldn't send your message. Please try again.");
+      return;
+    }
+
+    setSent(true);
+    toast.success("Message sent — thank you.", {
+      description: `We'll reply from ${RECIPIENT}.`,
+    });
+    setName("");
+    setEmail("");
+    setMessage("");
+  };
 
   return (
     <SiteLayout>
@@ -44,7 +101,7 @@ function ContactPage() {
             </div>
             <div>
               <dt className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Email</dt>
-              <dd className="mt-1">hello@lestationery.com</dd>
+              <dd className="mt-1">{RECIPIENT}</dd>
             </div>
             <div>
               <dt className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Hours</dt>
@@ -54,29 +111,32 @@ function ContactPage() {
         </div>
 
         <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            setSent(true);
-            toast.success("Message sent — thank you.");
-          }}
+          onSubmit={handleSubmit}
+          noValidate
           className="rounded-lg border border-border bg-card p-8 shadow-soft"
         >
           <div className="space-y-5">
             <div>
               <Label htmlFor="name" className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Name</Label>
-              <Input id="name" required className="mt-2" />
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="mt-2" />
+              {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name}</p>}
             </div>
             <div>
               <Label htmlFor="email" className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Email</Label>
-              <Input id="email" type="email" required className="mt-2" />
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2" />
+              {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
             </div>
             <div>
               <Label htmlFor="message" className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Message</Label>
-              <Textarea id="message" required rows={6} className="mt-2" />
+              <Textarea id="message" rows={6} value={message} onChange={(e) => setMessage(e.target.value)} className="mt-2" />
+              {errors.message && <p className="mt-1 text-xs text-destructive">{errors.message}</p>}
             </div>
-            <Button type="submit" size="lg" className="w-full rounded-full" disabled={sent}>
-              {sent ? "Sent" : "Send message"}
+            <Button type="submit" size="lg" className="w-full rounded-full" disabled={loading || sent}>
+              {loading ? "Sending…" : sent ? "Sent ✓" : "Send message"}
             </Button>
+            <p className="text-center text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+              Delivered to {RECIPIENT}
+            </p>
           </div>
         </form>
       </section>
