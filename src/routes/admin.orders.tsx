@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Fragment, useEffect, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
-const FragmentWithKey = ({ children }: { children: ReactNode }) => <Fragment>{children}</Fragment>;
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import {
