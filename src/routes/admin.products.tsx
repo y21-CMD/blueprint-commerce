@@ -250,8 +250,47 @@ function ProductsAdmin() {
               </div>
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="image">Image URL</Label>
-              <Input id="image" value={form.image ?? ""} onChange={(e) => setForm({ ...form, image: e.target.value })} placeholder="https://…" />
+              <Label>Product image</Label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleImageUpload(f);
+                  e.target.value = "";
+                }}
+              />
+              {form.image ? (
+                <div className="relative inline-block">
+                  <img src={form.image} alt="Product preview" className="h-32 w-32 rounded-md border border-border object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, image: "" })}
+                    className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-destructive-foreground shadow-sm hover:opacity-90"
+                    aria-label="Remove image"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="flex h-32 w-32 flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-[var(--gold)] hover:text-[var(--gold)] disabled:opacity-60"
+                >
+                  {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImagePlus className="h-5 w-5" />}
+                  <span className="text-xs">{uploading ? "Uploading…" : "Upload image"}</span>
+                </button>
+              )}
+              <Input
+                value={form.image ?? ""}
+                onChange={(e) => setForm({ ...form, image: e.target.value })}
+                placeholder="…or paste an image URL"
+                className="mt-1"
+              />
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor="short">Short description</Label>
