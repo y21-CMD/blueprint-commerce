@@ -1,5 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import { z } from "zod";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,31 +14,75 @@ export const Route = createFileRoute("/signup")({
   component: SignupPage,
 });
 
+const signupSchema = z
+  .object({
+    name: z.string().trim().min(1, "Please enter your name").max(100),
+    email: z.string().trim().email("Enter a valid email").max(255),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .max(72, "Password is too long"),
+    confirm: z.string(),
+  })
+  .refine((d) => d.password === d.confirm, {
+    message: "Passwords don't match",
+    path: ["confirm"],
+  });
+
 function SignupPage() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+
+    const result = signupSchema.safeParse({ name, email, password, confirm });
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const key = issue.path[0]?.toString() ?? "form";
+        if (!fieldErrors[key]) fieldErrors[key] = issue.message;
+      }
+      setErrors(fieldErrors);
+      return;
+    }
+
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: `${window.location.origin}/dashboard`,
         data: { full_name: name },
       },
     });
     setLoading(false);
+
     if (error) {
       toast.error(error.message);
       return;
     }
-    toast.success("Account created — please check your email to confirm.");
-    navigate({ to: "/login" });
+
+    // Instant in-app welcome — fires immediately on successful signup.
+    toast.success(`Welcome to Lestationery, ${name.split(" ")[0]} ✨`, {
+      description:
+        "Your account is ready. We've sent a confirmation to your inbox — please verify to sign in.",
+      duration: 6000,
+    });
+
+    if (data.session) {
+      navigate({ to: "/dashboard" });
+    } else {
+      navigate({ to: "/login" });
+    }
   };
 
   return (
@@ -50,19 +96,72 @@ function SignupPage() {
             Create your account
           </h1>
         </div>
-        <form onSubmit={handleSubmit} className="mt-10 space-y-5">
+        <form onSubmit={handleSubmit} noValidate className="mt-10 space-y-5">
           <div>
             <Label htmlFor="name" className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Full name</Label>
-            <Input id="name" required value={name} onChange={(e) => setName(e.target.value)} className="mt-2" />
+            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="mt-2" />
+            {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name}</p>}
           </div>
+
           <div>
             <Label htmlFor="email" className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Email</Label>
-            <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2" />
+            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2" />
+            {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
           </div>
+
           <div>
             <Label htmlFor="password" className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Password</Label>
-            <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2" />
+            <div className="relative mt-2">
+              <Input
+                id="password"
+                type={showPw ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pr-10"
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPw((s) => !s)}
+                aria-label={showPw ? "Hide password" : "Show password"}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1.5 text-muted-foreground hover:text-primary"
+              >
+                {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            {errors.password ? (
+              <p className="mt-1 text-xs text-destructive">{errors.password}</p>
+            ) : (
+              <p className="mt-1 text-xs text-muted-foreground">At least 8 characters.</p>
+            )}
           </div>
+
+          <div>
+            <Label htmlFor="confirm" className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Confirm password</Label>
+            <div className="relative mt-2">
+              <Input
+                id="confirm"
+                type={showConfirm ? "text" : "password"}
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                className="pr-10"
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm((s) => !s)}
+                aria-label={showConfirm ? "Hide password" : "Show password"}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1.5 text-muted-foreground hover:text-primary"
+              >
+                {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            {errors.confirm && <p className="mt-1 text-xs text-destructive">{errors.confirm}</p>}
+            {!errors.confirm && confirm.length > 0 && password === confirm && (
+              <p className="mt-1 text-xs text-primary">Passwords match.</p>
+            )}
+          </div>
+
           <Button type="submit" size="lg" disabled={loading} className="w-full rounded-full">
             {loading ? "Creating account…" : "Create account"}
           </Button>
