@@ -66,44 +66,21 @@ function ResetPasswordOtpPage() {
     if (!email || !otpId) return;
 
     setLoading(true);
-
-    // Re-confirm the OTP row is verified and recent (defence-in-depth).
-    const { data: otp, error: otpError } = await supabase
-      .from("signup_otps")
-      .select("id, verified, expires_at")
-      .eq("id", otpId)
-      .eq("email", email)
-      .eq("purpose", "password_reset")
-      .maybeSingle();
-
-    if (otpError || !otp || !otp.verified) {
+    try {
+      await resetPasswordWithOtp({
+        data: { email, otpId, password: result.data.password },
+      });
       setLoading(false);
-      toast.error("Reset session expired. Please request a new code.");
-      navigate({ to: "/forgot-password" });
-      return;
+      toast.success("Password updated ✨", {
+        description: "You can now sign in with your new password.",
+        duration: 6000,
+      });
+      navigate({ to: "/login" });
+    } catch (err) {
+      setLoading(false);
+      const message = err instanceof Error ? err.message : "Couldn't reset password.";
+      toast.error(message);
     }
-
-    // Use Supabase's official reset link to actually update the password.
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-
-    setLoading(false);
-
-    if (resetError) {
-      toast.error(resetError.message);
-      return;
-    }
-
-    // Invalidate the OTP so it can't be re-used.
-    await supabase.from("signup_otps").update({ verified: false }).eq("id", otpId);
-
-    toast.success("Password reset link sent", {
-      description:
-        "We've emailed you a secure link to finish setting your new password.",
-      duration: 10000,
-    });
-    navigate({ to: "/login" });
   };
 
   return (
