@@ -169,6 +169,9 @@
   .bg-gradient-sage {
     background-image: var(--gradient-sage);
   }
+  .bg-gradient-gold {
+    background-image: var(--gradient-gold);
+  }
   .shadow-soft {
     box-shadow: var(--shadow-soft);
   }
