@@ -1,23 +1,27 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
+import { resetPasswordWithOtp } from "@/server/password-reset.functions";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/signup")({
-  head: () => ({ meta: [{ title: "Create account — Lestationery" }] }),
-  component: SignupPage,
+const searchSchema = z.object({
+  email: z.string().email().optional().catch(undefined),
+  otpId: z.string().uuid().optional().catch(undefined),
 });
 
-const signupSchema = z
+export const Route = createFileRoute("/reset-password-otp")({
+  head: () => ({ meta: [{ title: "Set new password — Lestationery" }] }),
+  validateSearch: searchSchema,
+  component: ResetPasswordOtpPage,
+});
+
+const passwordSchema = z
   .object({
-    name: z.string().trim().min(1, "Please enter your name").max(100),
-    email: z.string().trim().email("Enter a valid email").max(255),
     password: z
       .string()
       .min(8, "Password must be at least 8 characters")
@@ -29,10 +33,9 @@ const signupSchema = z
     path: ["confirm"],
   });
 
-function SignupPage() {
+function ResetPasswordOtpPage() {
   const navigate = useNavigate();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const { email, otpId } = useSearch({ from: "/reset-password-otp" });
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -40,11 +43,17 @@ function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  useEffect(() => {
+    if (!email || !otpId) {
+      navigate({ to: "/forgot-password" });
+    }
+  }, [email, otpId, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
 
-    const result = signupSchema.safeParse({ name, email, password, confirm });
+    const result = passwordSchema.safeParse({ password, confirm });
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
       for (const issue of result.error.issues) {
@@ -54,70 +63,43 @@ function SignupPage() {
       setErrors(fieldErrors);
       return;
     }
+    if (!email || !otpId) return;
 
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
-        data: { full_name: name },
-      },
-    });
-
-    if (error) {
+    try {
+      await resetPasswordWithOtp({
+        data: { email, otpId, password: result.data.password },
+      });
       setLoading(false);
-      toast.error(error.message);
-      return;
+      toast.success("Password updated ✨", {
+        description: "You can now sign in with your new password.",
+        duration: 6000,
+      });
+      navigate({ to: "/login" });
+    } catch (err) {
+      setLoading(false);
+      const message = err instanceof Error ? err.message : "Couldn't reset password.";
+      toast.error(message);
     }
-
-    // Generate and store a 6-digit OTP for verification.
-    const code = String(Math.floor(100000 + Math.random() * 900000));
-    const { error: otpError } = await supabase
-      .from("signup_otps")
-      .insert({ email, code, purpose: "signup" });
-    setLoading(false);
-
-    if (otpError) {
-      toast.error("Account created but couldn't send verification code.");
-      return;
-    }
-
-    // Email delivery is skipped — show the code in a toast for demo/testing.
-    toast.success(`Welcome, ${name.split(" ")[0]} ✨`, {
-      description: `Your verification code is: ${code}`,
-      duration: 12000,
-    });
-
-    navigate({ to: "/verify-otp", search: { email } });
   };
 
   return (
     <SiteLayout>
       <section className="mx-auto max-w-md px-6 py-20">
         <div className="text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-            Lestationery
+          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Lestationery</p>
+          <h1 className="mt-4 font-display text-4xl text-primary">Set a new password</h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Choose a new password for{" "}
+            <span className="font-medium text-foreground">{email}</span>
           </p>
-          <h1 className="mt-4 font-display text-4xl text-primary">
-            Create your account
-          </h1>
         </div>
+
         <form onSubmit={handleSubmit} noValidate className="mt-10 space-y-5">
           <div>
-            <Label htmlFor="name" className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Full name</Label>
-            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="mt-2" />
-            {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name}</p>}
-          </div>
-
-          <div>
-            <Label htmlFor="email" className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Email</Label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2" />
-            {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
-          </div>
-
-          <div>
-            <Label htmlFor="password" className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Password</Label>
+            <Label htmlFor="password" className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              New password
+            </Label>
             <div className="relative mt-2">
               <Input
                 id="password"
@@ -144,7 +126,9 @@ function SignupPage() {
           </div>
 
           <div>
-            <Label htmlFor="confirm" className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Confirm password</Label>
+            <Label htmlFor="confirm" className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              Confirm password
+            </Label>
             <div className="relative mt-2">
               <Input
                 id="confirm"
@@ -170,13 +154,13 @@ function SignupPage() {
           </div>
 
           <Button type="submit" size="lg" disabled={loading} className="w-full rounded-full">
-            {loading ? "Creating account…" : "Create account"}
+            {loading ? "Updating…" : "Update password"}
           </Button>
         </form>
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          Already have one?{" "}
-          <Link to="/login" className="text-primary underline-offset-4 hover:underline">
-            Sign in
+
+        <p className="mt-6 text-center text-sm">
+          <Link to="/login" className="text-muted-foreground hover:text-primary">
+            Back to sign in
           </Link>
         </p>
       </section>

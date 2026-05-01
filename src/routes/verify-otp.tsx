@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 const searchSchema = z.object({
   email: z.string().email().optional().catch(undefined),
+  purpose: z.enum(["signup", "password_reset"]).optional().catch(undefined),
 });
 
 export const Route = createFileRoute("/verify-otp")({
@@ -18,7 +19,9 @@ export const Route = createFileRoute("/verify-otp")({
 
 function VerifyOtpPage() {
   const navigate = useNavigate();
-  const { email } = useSearch({ from: "/verify-otp" });
+  const { email, purpose: purposeParam } = useSearch({ from: "/verify-otp" });
+  const purpose = purposeParam ?? "signup";
+  const isReset = purpose === "password_reset";
   const [digits, setDigits] = useState<string[]>(Array(6).fill(""));
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
@@ -26,9 +29,9 @@ function VerifyOtpPage() {
 
   useEffect(() => {
     if (!email) {
-      navigate({ to: "/signup" });
+      navigate({ to: isReset ? "/forgot-password" : "/signup" });
     }
-  }, [email, navigate]);
+  }, [email, isReset, navigate]);
 
   const handleChange = (i: number, v: string) => {
     const c = v.replace(/\D/g, "").slice(-1);
@@ -68,6 +71,7 @@ function VerifyOtpPage() {
       .from("signup_otps")
       .select("*")
       .eq("email", email)
+      .eq("purpose", purpose)
       .eq("verified", false)
       .order("created_at", { ascending: false })
       .limit(1)
@@ -93,18 +97,24 @@ function VerifyOtpPage() {
 
     await supabase.from("signup_otps").update({ verified: true }).eq("id", data.id);
     setLoading(false);
-    toast.success("Email verified! ✨", {
-      description: "Your account is confirmed. You can now sign in.",
-      duration: 6000,
-    });
-    navigate({ to: "/login" });
+
+    if (isReset) {
+      toast.success("Code verified", { description: "Now choose a new password." });
+      navigate({ to: "/reset-password-otp", search: { email, otpId: data.id } });
+    } else {
+      toast.success("Email verified! ✨", {
+        description: "Your account is confirmed. You can now sign in.",
+        duration: 6000,
+      });
+      navigate({ to: "/login" });
+    }
   };
 
   const handleResend = async () => {
     if (!email) return;
     setResending(true);
     const code = String(Math.floor(100000 + Math.random() * 900000));
-    const { error } = await supabase.from("signup_otps").insert({ email, code });
+    const { error } = await supabase.from("signup_otps").insert({ email, code, purpose });
     setResending(false);
     if (error) {
       toast.error("Couldn't send a new code. Try again.");
@@ -121,7 +131,9 @@ function VerifyOtpPage() {
       <section className="mx-auto max-w-md px-6 py-20">
         <div className="text-center">
           <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Lestationery</p>
-          <h1 className="mt-4 font-display text-4xl text-primary">Verify your email</h1>
+          <h1 className="mt-4 font-display text-4xl text-primary">
+            {isReset ? "Verify reset code" : "Verify your email"}
+          </h1>
           <p className="mt-3 text-sm text-muted-foreground">
             Enter the 6-digit code we sent to{" "}
             <span className="font-medium text-foreground">{email}</span>
@@ -161,7 +173,10 @@ function VerifyOtpPage() {
             >
               {resending ? "Sending…" : "Resend code"}
             </button>
-            <Link to="/signup" className="text-muted-foreground hover:text-primary">
+            <Link
+              to={isReset ? "/forgot-password" : "/signup"}
+              className="text-muted-foreground hover:text-primary"
+            >
               Use a different email
             </Link>
           </div>
