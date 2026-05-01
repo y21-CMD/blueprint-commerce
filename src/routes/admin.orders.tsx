@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState, type ReactNode } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
+
+const FragmentWithKey = ({ children }: { children: ReactNode }) => <Fragment>{children}</Fragment>;
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -91,8 +93,8 @@ function OrdersAdmin() {
               <TableRow><TableCell colSpan={6} className="py-12 text-center text-muted-foreground">No orders yet.</TableCell></TableRow>
             ) : (
               orders.map((o) => (
-                <>
-                  <TableRow key={o.id} className="cursor-pointer" onClick={() => setExpanded(expanded === o.id ? null : o.id)}>
+                <FragmentWithKey key={o.id}>
+                  <TableRow className="cursor-pointer" onClick={() => setExpanded(expanded === o.id ? null : o.id)}>
                     <TableCell>
                       {expanded === o.id ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                     </TableCell>
@@ -119,7 +121,7 @@ function OrdersAdmin() {
                     </TableCell>
                   </TableRow>
                   {expanded === o.id && (
-                    <TableRow key={o.id + "-x"} className="bg-secondary/40 hover:bg-secondary/40">
+                    <TableRow className="bg-secondary/40 hover:bg-secondary/40">
                       <TableCell></TableCell>
                       <TableCell colSpan={5} className="py-4">
                         <p className="mb-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
@@ -136,7 +138,7 @@ function OrdersAdmin() {
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </FragmentWithKey>
               ))
             )}
           </TableBody>
