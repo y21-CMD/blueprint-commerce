@@ -16,6 +16,10 @@ import {
 } from "@/components/ui/select";
 
 const CATEGORIES = ["Journals", "Writing", "Cards", "Paper", "Sealing"] as const;
+const TRADE_TYPES = [
+  { value: "imported", label: "Imported Product" },
+  { value: "exported", label: "Exported Product" },
+] as const;
 import {
   Dialog,
   DialogContent,
@@ -42,6 +46,7 @@ type Product = {
   image: string | null;
   short: string;
   description: string;
+  trade_type: "imported" | "exported";
 };
 
 const empty: Omit<Product, "id"> = {
@@ -51,6 +56,7 @@ const empty: Omit<Product, "id"> = {
   image: "",
   short: "",
   description: "",
+  trade_type: "imported",
 };
 
 export const Route = createFileRoute("/admin/products")({
