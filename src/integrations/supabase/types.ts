@@ -143,6 +143,7 @@ export type Database = {
           name: string
           price: number
           short: string
+          trade_type: string
           updated_at: string
         }
         Insert: {
@@ -154,6 +155,7 @@ export type Database = {
           name: string
           price?: number
           short?: string
+          trade_type?: string
           updated_at?: string
         }
         Update: {
@@ -165,6 +167,7 @@ export type Database = {
           name?: string
           price?: number
           short?: string
+          trade_type?: string
           updated_at?: string
         }
         Relationships: []
@@ -175,6 +178,7 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          is_blocked: boolean
           updated_at: string
         }
         Insert: {
@@ -182,6 +186,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          is_blocked?: boolean
           updated_at?: string
         }
         Update: {
@@ -189,6 +194,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          is_blocked?: boolean
           updated_at?: string
         }
         Relationships: []
