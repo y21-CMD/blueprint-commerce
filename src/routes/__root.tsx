@@ -1,25 +1,32 @@
 import {
   Outlet,
   Link,
-  createRootRoute,
+  createRootRouteWithContext,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import type { QueryClient } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ChatWidget } from "@/components/site/ChatWidget";
 
 import appCss from "../styles.css?url";
+
+interface RouterContext {
+  queryClient: QueryClient;
+}
 
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-          Lestationery
+          My-Sea International
         </p>
         <h1 className="mt-6 font-display text-7xl text-primary">404</h1>
-        <h2 className="mt-4 font-display text-2xl">This page is unwritten</h2>
+        <h2 className="mt-4 font-display text-2xl">This page is uncharted</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           The page you're looking for doesn't exist or has been moved.
         </p>
@@ -36,22 +43,22 @@ function NotFoundComponent() {
   );
 }
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lestationery — Quietly made paper goods" },
+      { title: "My-Sea International — Stationery Import & Export" },
       {
         name: "description",
         content:
-          "Hand-bound journals, brass pens, letterpress cards and wax seals. Stationery made slowly, in small batches.",
+          "Global stationery import and export. Premium journals, writing instruments, paper goods, and sealing wax shipped worldwide.",
       },
-      { property: "og:title", content: "Lestationery" },
+      { property: "og:title", content: "My-Sea International" },
       {
         property: "og:description",
         content:
-          "Hand-bound journals, brass pens, letterpress cards and wax seals.",
+          "Global stationery import and export — sourcing, freight, and B2B distribution worldwide.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -78,12 +85,16 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const { queryClient } = Route.useRouteContext();
   return (
-    <AuthProvider>
-      <CartProvider>
-        <Outlet />
-        <Toaster />
-      </CartProvider>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <CartProvider>
+          <Outlet />
+          <ChatWidget />
+          <Toaster />
+        </CartProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
