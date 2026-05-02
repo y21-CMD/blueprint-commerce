@@ -1,7 +1,7 @@
-import { createFileRoute, notFound, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { Button } from "@/components/ui/button";
-import { getProduct, products } from "@/data/products";
+import { useProducts, useProduct } from "@/hooks/useProducts";
 import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/format";
 import { toast } from "sonner";
@@ -10,81 +10,85 @@ import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/product/$id")({
-  loader: ({ params }) => {
-    const product = getProduct(params.id);
-    if (!product) throw notFound();
-    return { product };
-  },
-  head: ({ loaderData }) => ({
-    meta: [
-      { title: `${loaderData?.product.name ?? "Product"} — Lestationery` },
-      {
-        name: "description",
-        content: loaderData?.product.short ?? "",
-      },
-      {
-        property: "og:image",
-        content: loaderData?.product.image ?? "",
-      },
-    ],
+  head: () => ({
+    meta: [{ title: "Product — My-Sea International" }],
   }),
   component: ProductPage,
-  notFoundComponent: () => (
-    <SiteLayout>
-      <div className="mx-auto max-w-xl px-6 py-32 text-center">
-        <h1 className="font-display text-4xl text-primary">Not found</h1>
-        <p className="mt-3 text-muted-foreground">
-          That product seems to have wandered off.
-        </p>
-        <Button asChild className="mt-8">
-          <Link to="/catalog">Back to the shop</Link>
-        </Button>
-      </div>
-    </SiteLayout>
-  ),
-  errorComponent: () => (
-    <SiteLayout>
-      <div className="mx-auto max-w-xl px-6 py-32 text-center">
-        <h1 className="font-display text-3xl">Something went wrong</h1>
-        <Button asChild className="mt-8">
-          <Link to="/catalog">Back to the shop</Link>
-        </Button>
-      </div>
-    </SiteLayout>
-  ),
 });
 
 function ProductPage() {
-  const { product } = Route.useLoaderData();
+  const { id } = Route.useParams();
+  const { data: product, isLoading } = useProduct(id);
+  const { data: all } = useProducts();
   const { add } = useCart();
   const [qty, setQty] = useState(1);
 
-  const related = products.filter((p) => p.id !== product.id).slice(0, 3);
+  if (isLoading) {
+    return (
+      <SiteLayout>
+        <div className="mx-auto max-w-xl px-6 py-32 text-center text-muted-foreground">
+          Loading…
+        </div>
+      </SiteLayout>
+    );
+  }
+
+  if (!product) {
+    return (
+      <SiteLayout>
+        <div className="mx-auto max-w-xl px-6 py-32 text-center">
+          <h1 className="font-display text-4xl text-primary">Not found</h1>
+          <p className="mt-3 text-muted-foreground">
+            That product seems to have wandered off.
+          </p>
+          <Button asChild className="mt-8">
+            <Link to="/catalog">Back to the catalog</Link>
+          </Button>
+        </div>
+      </SiteLayout>
+    );
+  }
+
+  const related = (all ?? []).filter((p) => p.id !== product.id).slice(0, 3);
 
   return (
     <SiteLayout>
       <article className="mx-auto grid max-w-7xl gap-12 px-6 pt-12 pb-24 md:grid-cols-2 md:gap-20 md:pt-20">
-        <div className="overflow-hidden rounded-lg bg-secondary/40">
-          <img
-            src={product.image}
-            alt={product.name}
-            width={800}
-            height={1000}
-            className="aspect-[4/5] w-full object-cover"
-          />
+        <div className="relative overflow-hidden rounded-lg bg-secondary/40">
+          {product.image ? (
+            <img
+              src={product.image}
+              alt={product.name}
+              width={800}
+              height={1000}
+              className="aspect-[4/5] w-full object-cover"
+            />
+          ) : (
+            <div className="flex aspect-[4/5] w-full items-center justify-center text-muted-foreground">
+              No image
+            </div>
+          )}
+          <span
+            className={
+              "absolute left-4 top-4 rounded-full px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] shadow-soft " +
+              (product.trade_type === "exported"
+                ? "bg-[var(--gold)] text-[var(--ink)]"
+                : "bg-[var(--royal-deep)] text-white")
+            }
+          >
+            {product.trade_type === "exported" ? "Export Product" : "Import Product"}
+          </span>
         </div>
         <div className="flex flex-col justify-center">
           <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
             {product.category}
           </p>
-          <h1 className="mt-4 font-display text-5xl text-primary">
-            {product.name}
-          </h1>
+          <h1 className="mt-4 font-display text-5xl text-primary">{product.name}</h1>
           <p className="mt-4 font-display text-2xl text-foreground/80">
-            {formatPrice(product.price)}
+            {formatPrice(Number(product.price))}
           </p>
           <p className="mt-8 text-base leading-relaxed text-muted-foreground">
-            {product.description}
+            {product.description || product.short}
           </p>
 
           <div className="mt-10 flex items-center gap-4">
@@ -109,7 +113,19 @@ function ProductPage() {
               size="lg"
               className="flex-1 rounded-full"
               onClick={() => {
-                add(product, qty);
+                add(
+                  {
+                    id: product.id,
+                    name: product.name,
+                    category: product.category,
+                    price: Number(product.price),
+                    image: product.image ?? "",
+                    short: product.short,
+                    description: product.description,
+                    trade_type: product.trade_type,
+                  },
+                  qty,
+                );
                 toast.success(`${product.name} added to cart`);
               }}
             >
@@ -118,21 +134,34 @@ function ProductPage() {
           </div>
 
           <ul className="mt-10 space-y-3 border-t border-border pt-8 text-sm text-muted-foreground">
-            <li>· Hand-finished in Stockholm</li>
-            <li>· Free shipping on orders over $80</li>
+            <li>· Worldwide sea freight available</li>
+            <li>· B2B wholesale pricing on request</li>
             <li>· Returns accepted within 30 days</li>
           </ul>
         </div>
       </article>
 
-      <section className="mx-auto max-w-7xl px-6 pb-24">
-        <h2 className="mb-10 font-display text-3xl">You may also like</h2>
-        <div className="grid gap-10 md:grid-cols-3">
-          {related.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
-      </section>
+      {related.length > 0 && (
+        <section className="mx-auto max-w-7xl px-6 pb-24">
+          <h2 className="mb-10 font-display text-3xl">You may also like</h2>
+          <div className="grid gap-10 md:grid-cols-3">
+            {related.map((p) => (
+              <ProductCard
+                key={p.id}
+                product={{
+                  id: p.id,
+                  name: p.name,
+                  category: p.category,
+                  price: Number(p.price),
+                  image: p.image ?? "",
+                  short: p.short,
+                  trade_type: p.trade_type,
+                }}
+              />
+            ))}
+          </div>
+        </section>
+      )}
     </SiteLayout>
   );
 }
