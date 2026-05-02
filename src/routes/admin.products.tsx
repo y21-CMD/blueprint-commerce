@@ -127,6 +127,7 @@ function ProductsAdmin() {
       image: p.image ?? "",
       short: p.short,
       description: p.description,
+      trade_type: p.trade_type ?? "imported",
     });
     setOpen(true);
   };
