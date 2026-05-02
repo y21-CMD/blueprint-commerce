@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/forgot-password")({
-  head: () => ({ meta: [{ title: "Forgot password — Lestationery" }] }),
+  head: () => ({ meta: [{ title: "Forgot password — My-Sea International" }] }),
   component: ForgotPasswordPage,
 });
 
@@ -53,7 +53,7 @@ function ForgotPasswordPage() {
     <SiteLayout>
       <section className="mx-auto max-w-md px-6 py-20">
         <div className="text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Lestationery</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">My-Sea International</p>
           <h1 className="mt-4 font-display text-4xl text-primary">Forgot password</h1>
           <p className="mt-3 text-sm text-muted-foreground">
             Enter your email and we'll send you a 6-digit reset code.

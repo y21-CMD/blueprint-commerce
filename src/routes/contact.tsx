@@ -12,10 +12,10 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact — Lestationery" },
+      { title: "Contact — My-Sea International" },
       {
         name: "description",
-        content: "Write to the Lestationery studio. We answer every letter.",
+        content: "Write to the My-Sea International studio. We answer every letter.",
       },
     ],
   }),

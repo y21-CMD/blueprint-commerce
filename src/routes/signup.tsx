@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/signup")({
-  head: () => ({ meta: [{ title: "Create account — Lestationery" }] }),
+  head: () => ({ meta: [{ title: "Create account — My-Sea International" }] }),
   component: SignupPage,
 });
 
@@ -97,7 +97,7 @@ function SignupPage() {
       <section className="mx-auto max-w-md px-6 py-20">
         <div className="text-center">
           <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-            Lestationery
+            My-Sea International
           </p>
           <h1 className="mt-4 font-display text-4xl text-primary">
             Create your account

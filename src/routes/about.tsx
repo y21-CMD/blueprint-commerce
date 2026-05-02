@@ -6,7 +6,7 @@ import heroImg from "@/assets/hero-stationery.jpg";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "Our Story — Lestationery" },
+      { title: "Our Story — My-Sea International" },
       {
         name: "description",
         content:
@@ -28,7 +28,7 @@ function AboutPage() {
           A quiet studio in Stockholm.
         </h1>
         <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
-          Lestationery began with a single linen-bound notebook and a borrowed
+          My-Sea International began with a single linen-bound notebook and a borrowed
           letterpress. Today, we're still small — a studio of three, a press,
           and a great deal of patience.
         </p>
@@ -36,7 +36,7 @@ function AboutPage() {
 
       <img
         src={heroImg}
-        alt="The Lestationery studio"
+        alt="The My-Sea International studio"
         className="mx-auto mt-8 aspect-[16/8] max-w-5xl rounded-2xl object-cover px-6"
         loading="lazy"
       />

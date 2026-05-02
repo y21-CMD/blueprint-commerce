@@ -15,7 +15,7 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/login")({
   validateSearch: searchSchema,
-  head: () => ({ meta: [{ title: "Sign in — Lestationery" }] }),
+  head: () => ({ meta: [{ title: "Sign in — My-Sea International" }] }),
   component: LoginPage,
 });
 
@@ -49,7 +49,7 @@ function LoginPage() {
       <section className="mx-auto max-w-md px-6 py-20">
         <div className="text-center">
           <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-            Lestationery
+            My-Sea International
           </p>
           <h1 className="mt-4 font-display text-4xl text-primary">Welcome back</h1>
         </div>
