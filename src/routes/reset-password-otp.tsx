@@ -6,7 +6,7 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { resetPasswordWithOtp } from "@/server/password-reset.functions";
+import { resetPasswordWithOtp } from "@/server/password-reset.server";
 import { toast } from "sonner";
 
 const searchSchema = z.object({
