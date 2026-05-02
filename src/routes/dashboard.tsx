@@ -24,7 +24,7 @@ type OrderRow = {
 };
 
 export const Route = createFileRoute("/dashboard")({
-  head: () => ({ meta: [{ title: "Account — Lestationery" }] }),
+  head: () => ({ meta: [{ title: "Account — My-Sea International" }] }),
   component: DashboardPage,
 });
 

@@ -11,7 +11,7 @@ import { formatPrice } from "@/lib/format";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/checkout")({
-  head: () => ({ meta: [{ title: "Checkout — Lestationery" }] }),
+  head: () => ({ meta: [{ title: "Checkout — My-Sea International" }] }),
   component: CheckoutPage,
 });
 

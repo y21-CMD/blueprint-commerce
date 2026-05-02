@@ -16,6 +16,10 @@ import {
 } from "@/components/ui/select";
 
 const CATEGORIES = ["Journals", "Writing", "Cards", "Paper", "Sealing"] as const;
+const TRADE_TYPES = [
+  { value: "imported", label: "Imported Product" },
+  { value: "exported", label: "Exported Product" },
+] as const;
 import {
   Dialog,
   DialogContent,
@@ -42,6 +46,7 @@ type Product = {
   image: string | null;
   short: string;
   description: string;
+  trade_type: "imported" | "exported";
 };
 
 const empty: Omit<Product, "id"> = {
@@ -51,6 +56,7 @@ const empty: Omit<Product, "id"> = {
   image: "",
   short: "",
   description: "",
+  trade_type: "imported",
 };
 
 export const Route = createFileRoute("/admin/products")({
@@ -121,6 +127,7 @@ function ProductsAdmin() {
       image: p.image ?? "",
       short: p.short,
       description: p.description,
+      trade_type: p.trade_type ?? "imported",
     });
     setOpen(true);
   };
@@ -168,6 +175,7 @@ function ProductsAdmin() {
           <TableHeader>
             <TableRow>
               <TableHead>Product</TableHead>
+              <TableHead>Trade</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Price</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -176,13 +184,13 @@ function ProductsAdmin() {
           <TableBody>
             {items === null ? (
               <TableRow>
-                <TableCell colSpan={4} className="py-12 text-center text-muted-foreground">
+                <TableCell colSpan={5} className="py-12 text-center text-muted-foreground">
                   Loading…
                 </TableCell>
               </TableRow>
             ) : items.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="py-12 text-center text-muted-foreground">
+                <TableCell colSpan={5} className="py-12 text-center text-muted-foreground">
                   No products yet.
                 </TableCell>
               </TableRow>
@@ -199,6 +207,18 @@ function ProductsAdmin() {
                         <p className="text-xs text-muted-foreground line-clamp-1">{p.short}</p>
                       </div>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    <span
+                      className={
+                        "rounded-full px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.15em] " +
+                        ((p.trade_type ?? "imported") === "exported"
+                          ? "bg-[var(--gold)]/20 text-[var(--gold-deep)]"
+                          : "bg-[var(--royal)]/15 text-[var(--royal-deep)]")
+                      }
+                    >
+                      {(p.trade_type ?? "imported") === "exported" ? "Export" : "Import"}
+                    </span>
                   </TableCell>
                   <TableCell>{p.category}</TableCell>
                   <TableCell className="font-medium">{formatPrice(Number(p.price))}</TableCell>
@@ -228,6 +248,22 @@ function ProductsAdmin() {
             <div className="grid gap-1.5">
               <Label htmlFor="name">Name</Label>
               <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="trade_type">Trade type</Label>
+              <Select
+                value={form.trade_type}
+                onValueChange={(v) => setForm({ ...form, trade_type: v as "imported" | "exported" })}
+              >
+                <SelectTrigger id="trade_type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TRADE_TYPES.map((t) => (
+                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-1.5">

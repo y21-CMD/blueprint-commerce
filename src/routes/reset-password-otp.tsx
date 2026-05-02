@@ -15,7 +15,7 @@ const searchSchema = z.object({
 });
 
 export const Route = createFileRoute("/reset-password-otp")({
-  head: () => ({ meta: [{ title: "Set new password — Lestationery" }] }),
+  head: () => ({ meta: [{ title: "Set new password — My-Sea International" }] }),
   validateSearch: searchSchema,
   component: ResetPasswordOtpPage,
 });
@@ -87,7 +87,7 @@ function ResetPasswordOtpPage() {
     <SiteLayout>
       <section className="mx-auto max-w-md px-6 py-20">
         <div className="text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Lestationery</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">My-Sea International</p>
           <h1 className="mt-4 font-display text-4xl text-primary">Set a new password</h1>
           <p className="mt-3 text-sm text-muted-foreground">
             Choose a new password for{" "}

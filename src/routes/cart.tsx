@@ -6,7 +6,7 @@ import { formatPrice } from "@/lib/format";
 import { Minus, Plus, X } from "lucide-react";
 
 export const Route = createFileRoute("/cart")({
-  head: () => ({ meta: [{ title: "Cart — Lestationery" }] }),
+  head: () => ({ meta: [{ title: "Cart — My-Sea International" }] }),
   component: CartPage,
 });
 

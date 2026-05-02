@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/format";
 
 export const Route = createFileRoute("/admin/")({
-  head: () => ({ meta: [{ title: "Admin — Lestationery" }] }),
+  head: () => ({ meta: [{ title: "Admin — My-Sea International" }] }),
   component: AdminOverview,
 });
 

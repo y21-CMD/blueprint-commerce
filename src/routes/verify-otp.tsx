@@ -12,7 +12,7 @@ const searchSchema = z.object({
 });
 
 export const Route = createFileRoute("/verify-otp")({
-  head: () => ({ meta: [{ title: "Verify your email — Lestationery" }] }),
+  head: () => ({ meta: [{ title: "Verify your email — My-Sea International" }] }),
   validateSearch: searchSchema,
   component: VerifyOtpPage,
 });
@@ -130,7 +130,7 @@ function VerifyOtpPage() {
     <SiteLayout>
       <section className="mx-auto max-w-md px-6 py-20">
         <div className="text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Lestationery</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">My-Sea International</p>
           <h1 className="mt-4 font-display text-4xl text-primary">
             {isReset ? "Verify reset code" : "Verify your email"}
           </h1>

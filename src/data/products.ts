@@ -5,14 +5,16 @@ import wax from "@/assets/product-wax.jpg";
 import paper from "@/assets/product-paper.jpg";
 import planner from "@/assets/product-planner.jpg";
 
+// Shape used by the cart and product pages. DB products satisfy this too.
 export type Product = {
   id: string;
   name: string;
-  category: "Journals" | "Writing" | "Cards" | "Paper" | "Sealing";
+  category: string;
   price: number;
   image: string;
   short: string;
   description: string;
+  trade_type?: "imported" | "exported";
 };
 
 export const products: Product[] = [
@@ -24,7 +26,7 @@ export const products: Product[] = [
     image: journal,
     short: "Hand-bound, 192 pages of cream cotton paper.",
     description:
-      "A quiet companion. Bound by hand in supple sage leather, filled with 192 pages of acid-free cream cotton paper that takes ink beautifully. Designed to lie flat, age gracefully, and follow you everywhere.",
+      "A quiet companion. Bound by hand in supple sage leather, filled with 192 pages of acid-free cream cotton paper that takes ink beautifully.",
   },
   {
     id: "brass-fountain-pen",
@@ -33,8 +35,7 @@ export const products: Product[] = [
     price: 86,
     image: pen,
     short: "Solid brass body with a medium iridium nib.",
-    description:
-      "Weighted, balanced, deliberate. A solid brass pen finished by hand and fitted with a medium iridium nib that lays down a smooth, generous line. Ships in a linen sleeve.",
+    description: "Weighted, balanced, deliberate. A solid brass pen with medium iridium nib.",
   },
   {
     id: "letterpress-card-set",
@@ -43,8 +44,7 @@ export const products: Product[] = [
     price: 24,
     image: cards,
     short: "Set of ten blush cards with envelopes.",
-    description:
-      "Ten cotton-paper cards pressed by foot in a small Stockholm studio. Soft blush, deep impression, paired with cream envelopes and twine.",
+    description: "Ten cotton-paper cards pressed by foot, paired with cream envelopes and twine.",
   },
   {
     id: "wax-seal-kit",
@@ -53,8 +53,7 @@ export const products: Product[] = [
     price: 38,
     image: wax,
     short: "Brass seal, six wax sticks, snuffer.",
-    description:
-      "A small ritual to close a letter. Includes a brass floral seal, six dusty rose wax sticks, and a brass snuffer in a linen pouch.",
+    description: "Brass floral seal, six dusty rose wax sticks, brass snuffer.",
   },
   {
     id: "cotton-letter-paper",
@@ -63,8 +62,7 @@ export const products: Product[] = [
     price: 22,
     image: paper,
     short: "Twenty-five sheets, sage ribbon.",
-    description:
-      "Twenty-five heavyweight cotton sheets in soft cream, gathered with a sage satin ribbon. Made for slow correspondence.",
+    description: "Twenty-five heavyweight cotton sheets in soft cream.",
   },
   {
     id: "weekly-planner",
@@ -73,19 +71,11 @@ export const products: Product[] = [
     price: 42,
     image: planner,
     short: "Undated, lay-flat, sage cloth cover.",
-    description:
-      "An undated weekly planner with a generous open spread, sage cloth cover, and a satin ribbon marker. Begin any week, any time.",
+    description: "Undated weekly planner with sage cloth cover and satin ribbon marker.",
   },
 ];
 
-export const categories = [
-  "All",
-  "Journals",
-  "Writing",
-  "Cards",
-  "Paper",
-  "Sealing",
-] as const;
+export const categories = ["All", "Journals", "Writing", "Cards", "Paper", "Sealing"] as const;
 
 export function getProduct(id: string) {
   return products.find((p) => p.id === id);

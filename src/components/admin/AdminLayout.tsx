@@ -16,7 +16,7 @@ const items = [
   { to: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { to: "/admin/products", label: "Products", icon: Package, exact: false },
   { to: "/admin/orders", label: "Orders", icon: ShoppingCart, exact: false },
-  { to: "/admin/users", label: "Users", icon: Users, exact: false },
+  { to: "/admin/users", label: "User Management", icon: Users, exact: false },
   { to: "/admin/messages", label: "Messages", icon: Mail, exact: false },
 ];
 
@@ -53,7 +53,7 @@ export function AdminLayout({
       <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-gradient-sage text-primary-foreground md:flex">
         <div className="px-6 py-8">
           <p className="text-[10px] uppercase tracking-[0.3em] text-primary-foreground/60">
-            Lestationery
+            My-Sea International
           </p>
           <h2 className="mt-2 font-display text-3xl text-[var(--gold)]">
             Admin
