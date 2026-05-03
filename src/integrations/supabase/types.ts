@@ -255,12 +255,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_otp: {
+        Args: { _email: string; _purpose?: string }
+        Returns: {
+          code: string
+          id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      verify_otp: {
+        Args: { _code: string; _email: string; _purpose?: string }
+        Returns: string
       }
     }
     Enums: {

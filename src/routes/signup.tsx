@@ -71,21 +71,21 @@ function SignupPage() {
       return;
     }
 
-    // Generate and store a 6-digit OTP for verification.
-    const code = String(Math.floor(100000 + Math.random() * 900000));
-    const { error: otpError } = await supabase
-      .from("signup_otps")
-      .insert({ email, code, purpose: "signup" });
+    // Securely create a 6-digit OTP server-side via SECURITY DEFINER function.
+    const { data: otp, error: otpError } = await supabase.rpc("create_otp", {
+      _email: email,
+      _purpose: "signup",
+    });
     setLoading(false);
 
-    if (otpError) {
-      toast.error("Account created but couldn't send verification code.");
+    if (otpError || !otp || !otp[0]) {
+      toast.error(otpError?.message ?? "Couldn't generate verification code.");
       return;
     }
 
-    // Email delivery is skipped — show the code in a toast for demo/testing.
+    // Email delivery not yet wired — temporarily display the code.
     toast.success(`Welcome, ${name.split(" ")[0]} ✨`, {
-      description: `Your verification code is: ${code}`,
+      description: `Your verification code is: ${otp[0].code}`,
       duration: 12000,
     });
 

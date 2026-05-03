@@ -31,19 +31,19 @@ function ForgotPasswordPage() {
     }
 
     setLoading(true);
-    const code = String(Math.floor(100000 + Math.random() * 900000));
-    const { error: insertError } = await supabase
-      .from("signup_otps")
-      .insert({ email: parsed.data, code, purpose: "password_reset" });
+    const { data: otp, error: insertError } = await supabase.rpc("create_otp", {
+      _email: parsed.data,
+      _purpose: "password_reset",
+    });
     setLoading(false);
 
-    if (insertError) {
-      toast.error("Couldn't send a reset code. Please try again.");
+    if (insertError || !otp || !otp[0]) {
+      toast.error(insertError?.message ?? "Couldn't send a reset code. Please try again.");
       return;
     }
 
     toast.success("Reset code sent", {
-      description: `Demo code: ${code}`,
+      description: `Demo code: ${otp[0].code}`,
       duration: 12000,
     });
     navigate({ to: "/verify-otp", search: { email: parsed.data, purpose: "password_reset" } });

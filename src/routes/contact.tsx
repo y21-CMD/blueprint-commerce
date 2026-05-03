@@ -96,8 +96,8 @@ function ContactPage() {
           </p>
           <dl className="mt-10 space-y-4 text-sm">
             <div>
-              <dt className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Studio</dt>
-              <dd className="mt-1">Söder Mälarstrand 27, Stockholm</dd>
+              <dt className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Office</dt>
+              <dd className="mt-1">Addis Ababa, Ethiopia</dd>
             </div>
             <div>
               <dt className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Email</dt>
@@ -105,9 +105,30 @@ function ContactPage() {
             </div>
             <div>
               <dt className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Hours</dt>
-              <dd className="mt-1">Tue–Sat · 11–18</dd>
+              <dd className="mt-1">Mon–Sat · 9–18</dd>
             </div>
           </dl>
+
+          <div className="mt-8 overflow-hidden rounded-lg border border-border shadow-soft">
+            <iframe
+              title="My-Sea International office location"
+              src="https://www.google.com/maps?q=9.0574969,38.7506648&hl=en&z=17&output=embed"
+              width="100%"
+              height="260"
+              style={{ border: 0 }}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              allowFullScreen
+            />
+            <a
+              href="https://maps.app.goo.gl/6fgcuzbVPN57wAQw9"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block bg-card px-4 py-3 text-xs uppercase tracking-[0.18em] text-primary hover:underline"
+            >
+              Open in Google Maps →
+            </a>
+          </div>
         </div>
 
         <form

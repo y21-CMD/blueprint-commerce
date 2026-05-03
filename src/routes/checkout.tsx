@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { placeOrder } from "@/server/orders.functions";
 import { formatPrice } from "@/lib/format";
 import { toast } from "sonner";
 
@@ -93,43 +93,28 @@ function CheckoutPage() {
     if (!user) return;
     setSubmitting(true);
     try {
-      const { data: order, error } = await supabase
-        .from("orders")
-        .insert({
-          user_id: user.id,
-          subtotal,
-          shipping,
-          total,
-          shipping_name: form.name,
-          shipping_email: form.email,
-          shipping_address: form.address,
-          shipping_city: form.city,
-          shipping_postal_code: form.postal_code,
-          shipping_country: form.country,
-          status: "paid",
-        })
-        .select()
-        .single();
-      if (error || !order) throw error ?? new Error("Could not create order");
-
-      const { error: itemsError } = await supabase.from("order_items").insert(
-        items.map((i) => ({
-          order_id: order.id,
-          product_id: i.product.id,
-          product_name: i.product.name,
-          product_image: i.product.image,
-          unit_price: i.product.price,
-          quantity: i.quantity,
-        })),
-      );
-      if (itemsError) throw itemsError;
-
+      await placeOrder({
+        data: {
+          items: items.map((i) => ({
+            product_id: i.product.id,
+            quantity: i.quantity,
+          })),
+          shipping: {
+            name: form.name,
+            email: form.email,
+            address: form.address,
+            city: form.city,
+            postal_code: form.postal_code,
+            country: form.country,
+          },
+        },
+      });
       clear();
       toast.success("Order placed — thank you.");
       navigate({ to: "/dashboard" });
     } catch (err) {
       console.error(err);
-      toast.error("Something went wrong. Please try again.");
+      toast.error(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
