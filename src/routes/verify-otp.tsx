@@ -67,40 +67,21 @@ function VerifyOtpPage() {
     }
 
     setLoading(true);
-    const { data, error } = await supabase
-      .from("signup_otps")
-      .select("*")
-      .eq("email", email)
-      .eq("purpose", purpose)
-      .eq("verified", false)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (error || !data) {
-      setLoading(false);
-      toast.error("No active code found. Please request a new one.");
-      return;
-    }
-
-    if (new Date(data.expires_at) < new Date()) {
-      setLoading(false);
-      toast.error("This code has expired. Please request a new one.");
-      return;
-    }
-
-    if (data.code !== code) {
-      setLoading(false);
-      toast.error("Incorrect code. Please try again.");
-      return;
-    }
-
-    await supabase.from("signup_otps").update({ verified: true }).eq("id", data.id);
+    const { data: otpId, error } = await supabase.rpc("verify_otp", {
+      _email: email,
+      _code: code,
+      _purpose: purpose,
+    });
     setLoading(false);
+
+    if (error || !otpId) {
+      toast.error(error?.message ?? "Verification failed.");
+      return;
+    }
 
     if (isReset) {
       toast.success("Code verified", { description: "Now choose a new password." });
-      navigate({ to: "/reset-password-otp", search: { email, otpId: data.id } });
+      navigate({ to: "/reset-password-otp", search: { email, otpId: otpId as string } });
     } else {
       toast.success("Email verified! ✨", {
         description: "Your account is confirmed. You can now sign in.",
@@ -113,15 +94,17 @@ function VerifyOtpPage() {
   const handleResend = async () => {
     if (!email) return;
     setResending(true);
-    const code = String(Math.floor(100000 + Math.random() * 900000));
-    const { error } = await supabase.from("signup_otps").insert({ email, code, purpose });
+    const { data: otp, error } = await supabase.rpc("create_otp", {
+      _email: email,
+      _purpose: purpose,
+    });
     setResending(false);
-    if (error) {
-      toast.error("Couldn't send a new code. Try again.");
+    if (error || !otp || !otp[0]) {
+      toast.error(error?.message ?? "Couldn't send a new code. Try again.");
       return;
     }
     toast.success("New code generated", {
-      description: `Demo code: ${code}`,
+      description: `Demo code: ${otp[0].code}`,
       duration: 10000,
     });
   };
