@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { placeOrder } from "@/server/orders.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/format";
 import { toast } from "sonner";
 
