@@ -93,8 +93,16 @@ function CheckoutPage() {
     if (!user) return;
     setSubmitting(true);
     try {
-      await placeOrder({
-        data: {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) throw new Error("Not authenticated");
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
           items: items.map((i) => ({
             product_id: i.product.id,
             quantity: i.quantity,
@@ -107,8 +115,12 @@ function CheckoutPage() {
             postal_code: form.postal_code,
             country: form.country,
           },
-        },
+        }),
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Order failed" }));
+        throw new Error(err.error || "Order failed");
+      }
       clear();
       toast.success("Order placed — thank you.");
       navigate({ to: "/dashboard" });
