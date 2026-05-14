@@ -9,8 +9,10 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { useIsOwner } from "@/hooks/useIsOwner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Crown } from "lucide-react";
 
 const items = [
   { to: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
@@ -28,6 +30,7 @@ export function AdminLayout({
   children: ReactNode;
 }) {
   const { isAdmin, loading, user } = useIsAdmin();
+  const { isOwner } = useIsOwner();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -81,7 +84,16 @@ export function AdminLayout({
             );
           })}
         </nav>
-        <div className="border-t border-primary-foreground/10 p-4">
+        <div className="space-y-1 border-t border-primary-foreground/10 p-4">
+          {isOwner && (
+            <Link
+              to="/owner"
+              className="flex items-center gap-2 rounded-md border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2 text-xs font-medium text-[var(--gold)] transition-smooth hover:bg-[var(--gold)]/20"
+            >
+              <Crown className="h-3.5 w-3.5" />
+              Owner Console
+            </Link>
+          )}
           <Button
             variant="ghost"
             size="sm"
