@@ -57,7 +57,7 @@ function OwnerControlCenter() {
 
   const reload = async () => {
     try {
-      const { users } = await fetchUsers({ data: undefined as never });
+      const { users } = await fetchUsers();
       setUsers(users);
     } catch (e: any) {
       toast.error(e?.message ?? "Failed to load users");
