@@ -293,7 +293,11 @@ function CheckoutPage() {
               disabled={submitting}
               className="mt-8 w-full rounded-full"
             >
-              {submitting ? "Placing order…" : "Place order"}
+              {uploadProgress
+                ? "Uploading receipt…"
+                : submitting
+                  ? "Placing order…"
+                  : "Submit payment proof"}
             </Button>
           </aside>
         </form>
