@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { NotificationBell } from "@/components/site/NotificationBell";
 import logo from "@/assets/logo.jpg";
 
 const nav = [
@@ -58,6 +59,7 @@ export function Header() {
         <div className="flex items-center gap-1">
           {user ? (
             <>
+              <NotificationBell />
               <Button
                 variant="ghost"
                 size="icon"
