@@ -22,6 +22,14 @@ const inputSchema = z.object({
     postal_code: z.string().trim().min(1).max(40),
     country: z.string().trim().min(1).max(120),
   }),
+  payment: z.object({
+    method: z.enum(["cbe", "telebirr", "boa", "abay"]),
+    ref: z.string().trim().max(120).optional().nullable(),
+    receipt_path: z.string().trim().max(500).optional().nullable(),
+    notes: z.string().trim().max(500).optional().nullable(),
+  }).refine((p) => !!p.ref || !!p.receipt_path, {
+    message: "Provide a transaction reference or upload a receipt.",
+  }),
 });
 
 function json(body: unknown, status = 200) {
@@ -113,7 +121,11 @@ export const Route = createFileRoute("/api/orders")({
             shipping_city: parsed.shipping.city,
             shipping_postal_code: parsed.shipping.postal_code,
             shipping_country: parsed.shipping.country,
-            status: "paid",
+            status: "pending",
+            payment_method: parsed.payment.method,
+            payment_ref: parsed.payment.ref ?? null,
+            payment_receipt_path: parsed.payment.receipt_path ?? null,
+            payment_notes: parsed.payment.notes ?? null,
           })
           .select()
           .single();

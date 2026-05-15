@@ -13,6 +13,7 @@ import { Route as VerifyOtpRouteImport } from './routes/verify-otp'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordOtpRouteImport } from './routes/reset-password-otp'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -49,6 +50,11 @@ const ResetPasswordOtpRoute = ResetPasswordOtpRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MessagesRoute = MessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/messages': typeof MessagesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/reset-password-otp': typeof ResetPasswordOtpRoute
   '/signup': typeof SignupRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/messages': typeof MessagesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/reset-password-otp': typeof ResetPasswordOtpRoute
   '/signup': typeof SignupRoute
@@ -194,6 +202,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/messages': typeof MessagesRoute
   '/reset-password': typeof ResetPasswordRoute
   '/reset-password-otp': typeof ResetPasswordOtpRoute
   '/signup': typeof SignupRoute
@@ -219,6 +228,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-password'
     | '/login'
+    | '/messages'
     | '/reset-password'
     | '/reset-password-otp'
     | '/signup'
@@ -242,6 +252,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-password'
     | '/login'
+    | '/messages'
     | '/reset-password'
     | '/reset-password-otp'
     | '/signup'
@@ -265,6 +276,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-password'
     | '/login'
+    | '/messages'
     | '/reset-password'
     | '/reset-password-otp'
     | '/signup'
@@ -289,6 +301,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  MessagesRoute: typeof MessagesRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResetPasswordOtpRoute: typeof ResetPasswordOtpRoute
   SignupRoute: typeof SignupRoute
@@ -331,6 +344,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/messages': {
+      id: '/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof MessagesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -465,6 +485,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  MessagesRoute: MessagesRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ResetPasswordOtpRoute: ResetPasswordOtpRoute,
   SignupRoute: SignupRoute,

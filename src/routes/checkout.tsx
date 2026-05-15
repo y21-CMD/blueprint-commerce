@@ -24,6 +24,15 @@ type Form = {
   country: string;
 };
 
+type PaymentMethod = "cbe" | "telebirr" | "boa" | "abay";
+
+const BANKS: { id: PaymentMethod; name: string; account: string }[] = [
+  { id: "cbe", name: "Commercial Bank of Ethiopia (CBE)", account: "1000-XXX-XXXX" },
+  { id: "telebirr", name: "Telebirr", account: "+251-9XX-XXX-XXX" },
+  { id: "boa", name: "Bank of Abyssinia (BOA)", account: "1234-5678-9012" },
+  { id: "abay", name: "Abay Bank", account: "9876-5432-1098" },
+];
+
 function CheckoutPage() {
   const { items, subtotal, clear } = useCart();
   const { user, loading: authLoading } = useAuth();
@@ -35,8 +44,12 @@ function CheckoutPage() {
     address: "",
     city: "",
     postal_code: "",
-    country: "",
+    country: "Ethiopia",
   });
+  const [method, setMethod] = useState<PaymentMethod>("cbe");
+  const [paymentRef, setPaymentRef] = useState("");
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(false);
 
   useEffect(() => {
     if (user?.email && !form.email) {
@@ -91,8 +104,28 @@ function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (!paymentRef.trim() && !receiptFile) {
+      toast.error("Enter a transaction reference or upload a receipt.");
+      return;
+    }
     setSubmitting(true);
     try {
+      let receiptPath: string | null = null;
+      if (receiptFile) {
+        if (receiptFile.size > 5 * 1024 * 1024) {
+          throw new Error("Receipt file is too large (max 5 MB).");
+        }
+        setUploadProgress(true);
+        const ext = receiptFile.name.split(".").pop() || "bin";
+        const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("payment-receipts")
+          .upload(path, receiptFile, { upsert: false, contentType: receiptFile.type });
+        setUploadProgress(false);
+        if (upErr) throw new Error("Receipt upload failed: " + upErr.message);
+        receiptPath = path;
+      }
+
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
       if (!token) throw new Error("Not authenticated");
@@ -115,6 +148,11 @@ function CheckoutPage() {
             postal_code: form.postal_code,
             country: form.country,
           },
+          payment: {
+            method,
+            ref: paymentRef.trim() || null,
+            receipt_path: receiptPath,
+          },
         }),
       });
       if (!res.ok) {
@@ -122,7 +160,7 @@ function CheckoutPage() {
         throw new Error(err.error || "Order failed");
       }
       clear();
-      toast.success("Order placed — thank you.");
+      toast.success("Order placed — awaiting payment approval.");
       navigate({ to: "/dashboard" });
     } catch (err) {
       console.error(err);
@@ -131,6 +169,8 @@ function CheckoutPage() {
       setSubmitting(false);
     }
   };
+
+  const selectedBank = BANKS.find((b) => b.id === method)!;
 
   return (
     <SiteLayout>
@@ -159,9 +199,64 @@ function CheckoutPage() {
 
             <div>
               <h2 className="mb-6 font-display text-2xl">Payment</h2>
-              <div className="rounded-lg border border-dashed border-border bg-secondary/30 p-6 text-sm text-muted-foreground">
-                This is a demo store — no card is charged. Your order will be
-                saved to your account.
+              <div className="space-y-4">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {BANKS.map((b) => (
+                    <button
+                      type="button"
+                      key={b.id}
+                      onClick={() => setMethod(b.id)}
+                      className={`rounded-lg border p-4 text-left transition-smooth ${
+                        method === b.id
+                          ? "border-primary bg-primary/5 ring-2 ring-primary/30"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <p className="font-medium">{b.name}</p>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="rounded-lg border border-border bg-secondary/30 p-4 text-sm">
+                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                    Send payment to
+                  </p>
+                  <p className="mt-1 font-medium">{selectedBank.name}</p>
+                  <p className="font-mono text-sm">{selectedBank.account}</p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Total: <strong>{formatPrice(total)}</strong>. After paying,
+                    enter your transaction reference number OR upload a receipt
+                    below.
+                  </p>
+                </div>
+
+                <Field
+                  label="Transaction Reference No."
+                  id="payment_ref"
+                  value={paymentRef}
+                  onChange={setPaymentRef}
+                />
+
+                <div>
+                  <Label
+                    htmlFor="receipt"
+                    className="text-xs uppercase tracking-[0.18em] text-muted-foreground"
+                  >
+                    Or upload receipt (image or PDF)
+                  </Label>
+                  <Input
+                    id="receipt"
+                    type="file"
+                    accept="image/*,application/pdf"
+                    className="mt-2"
+                    onChange={(e) => setReceiptFile(e.target.files?.[0] ?? null)}
+                  />
+                  {receiptFile && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Selected: {receiptFile.name}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -198,7 +293,11 @@ function CheckoutPage() {
               disabled={submitting}
               className="mt-8 w-full rounded-full"
             >
-              {submitting ? "Placing order…" : "Place order"}
+              {uploadProgress
+                ? "Uploading receipt…"
+                : submitting
+                  ? "Placing order…"
+                  : "Submit payment proof"}
             </Button>
           </aside>
         </form>

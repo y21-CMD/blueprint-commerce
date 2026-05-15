@@ -41,6 +41,36 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          body: string
+          created_at: string
+          customer_id: string
+          id: string
+          read_at: string | null
+          sender_id: string
+          sender_is_admin: boolean
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          read_at?: string | null
+          sender_id: string
+          sender_is_admin?: boolean
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          read_at?: string | null
+          sender_id?: string
+          sender_is_admin?: boolean
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string
@@ -84,8 +114,14 @@ export type Database = {
       }
       orders: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           created_at: string
           id: string
+          payment_method: string | null
+          payment_notes: string | null
+          payment_receipt_path: string | null
+          payment_ref: string | null
           shipping: number
           shipping_address: string
           shipping_city: string
@@ -100,8 +136,14 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           id?: string
+          payment_method?: string | null
+          payment_notes?: string | null
+          payment_receipt_path?: string | null
+          payment_ref?: string | null
           shipping?: number
           shipping_address: string
           shipping_city: string
@@ -116,8 +158,14 @@ export type Database = {
           user_id: string
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           id?: string
+          payment_method?: string | null
+          payment_notes?: string | null
+          payment_receipt_path?: string | null
+          payment_ref?: string | null
           shipping?: number
           shipping_address?: string
           shipping_city?: string
