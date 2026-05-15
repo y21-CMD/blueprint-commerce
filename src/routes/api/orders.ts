@@ -22,6 +22,14 @@ const inputSchema = z.object({
     postal_code: z.string().trim().min(1).max(40),
     country: z.string().trim().min(1).max(120),
   }),
+  payment: z.object({
+    method: z.enum(["cbe", "telebirr", "boa", "abay"]),
+    ref: z.string().trim().max(120).optional().nullable(),
+    receipt_path: z.string().trim().max(500).optional().nullable(),
+    notes: z.string().trim().max(500).optional().nullable(),
+  }).refine((p) => !!p.ref || !!p.receipt_path, {
+    message: "Provide a transaction reference or upload a receipt.",
+  }),
 });
 
 function json(body: unknown, status = 200) {
