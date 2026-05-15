@@ -24,6 +24,15 @@ type Form = {
   country: string;
 };
 
+type PaymentMethod = "cbe" | "telebirr" | "boa" | "abay";
+
+const BANKS: { id: PaymentMethod; name: string; account: string }[] = [
+  { id: "cbe", name: "Commercial Bank of Ethiopia (CBE)", account: "1000-XXX-XXXX" },
+  { id: "telebirr", name: "Telebirr", account: "+251-9XX-XXX-XXX" },
+  { id: "boa", name: "Bank of Abyssinia (BOA)", account: "1234-5678-9012" },
+  { id: "abay", name: "Abay Bank", account: "9876-5432-1098" },
+];
+
 function CheckoutPage() {
   const { items, subtotal, clear } = useCart();
   const { user, loading: authLoading } = useAuth();
@@ -35,8 +44,12 @@ function CheckoutPage() {
     address: "",
     city: "",
     postal_code: "",
-    country: "",
+    country: "Ethiopia",
   });
+  const [method, setMethod] = useState<PaymentMethod>("cbe");
+  const [paymentRef, setPaymentRef] = useState("");
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(false);
 
   useEffect(() => {
     if (user?.email && !form.email) {
