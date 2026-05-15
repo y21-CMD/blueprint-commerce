@@ -121,7 +121,11 @@ export const Route = createFileRoute("/api/orders")({
             shipping_city: parsed.shipping.city,
             shipping_postal_code: parsed.shipping.postal_code,
             shipping_country: parsed.shipping.country,
-            status: "paid",
+            status: "pending",
+            payment_method: parsed.payment.method,
+            payment_ref: parsed.payment.ref ?? null,
+            payment_receipt_path: parsed.payment.receipt_path ?? null,
+            payment_notes: parsed.payment.notes ?? null,
           })
           .select()
           .single();
